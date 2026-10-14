@@ -1,6 +1,6 @@
 import { validateDescription, cleanDescription, validateAmount, validateDate, checkDuplicateWord } from './validators.js';
-import { addRecord, getRecords, deleteRecord, updateRecord, sortRecords } from './state.js';
-import { showStatus, renderRecords, showSortState, showEmptyState } from './ui.js';
+import { addRecord, getRecords, deleteRecord, updateRecord, sortRecords, getTotal, getTopCategory, getLastSevenDays, getSettings, setBudget } from './state.js';
+import { showStatus, renderRecords, showSortState, showEmptyState, renderStats, renderChart, renderBudget } from './ui.js';
 import { compileRegex, matchesSearch } from './search.js';
 
 const form = document.getElementById('expense-form');
@@ -15,6 +15,8 @@ const searchInput = document.getElementById('search');
 const sortSelect = document.getElementById('sort');
 const caseToggle = document.getElementById('case-toggle');
 const matchCount = document.getElementById('match-count');
+const settingsForm = document.getElementById('settings-form');
+const budgetInput = document.getElementById('budget');
 
 let editingId = null;
 
@@ -42,6 +44,12 @@ function checkDescription() {
 function checkAmount() {
     const message = validateAmount(amountInput.value);
     showError(amountInput, message);
+    return message === '';
+}
+
+function checkBudget() {
+    const message = validateAmount(budgetInput.value);
+    showError(budgetInput, message);
     return message === '';
 }
 
@@ -130,6 +138,10 @@ function refresh(newId) {
     } else {
         showEmptyState('');
     }
+    const allRecords = getRecords();
+    renderStats(allRecords.length, getTotal(allRecords), getTopCategory(allRecords));
+    renderChart(getLastSevenDays(allRecords));
+    renderBudget(getSettings().budget, getTotal(allRecords));
 }
 
 // Each record is drawn twice (table row + phone card) and CSS hides one.
@@ -143,7 +155,7 @@ function focusInRecord(id, selector) {
 function startEdit(id) {
     editingId = id;
     refresh();
-    focusInRecord(id, '[data-field="description"]');
+    focusInRecord(id, '[data-field="date"]');
 }
 
 function cancelEdit() {
@@ -232,6 +244,19 @@ caseToggle.addEventListener('click', function () {
     const pressed = caseToggle.getAttribute('aria-pressed') === 'true';
     caseToggle.setAttribute('aria-pressed', String(!pressed));
     refresh();
+});
+
+budgetInput.addEventListener('input', checkBudget);
+
+settingsForm.addEventListener ('submit', function (event) {
+    event.preventDefault();
+    if (!checkBudget()) {
+        budgetInput.focus();
+        return;
+    }
+    setBudget(Number(budgetInput.value));
+    refresh();
+    showStatus('Settings saved.')
 });
 
 // Draw the page once when the app starts.

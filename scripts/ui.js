@@ -7,6 +7,16 @@ const statusBox = document.getElementById('status');
 const tableBody = document.getElementById('records-body');
 const cardList = document.getElementById('record-cards');
 const emptyState = document.getElementById('empty-state');
+const statCount = document.getElementById('stat-count');
+const statTotal = document.getElementById('stat-total');
+const statTop = document.getElementById('stat-top');
+const chart = document.getElementById('chart')
+const chartLabels = document.getElementById('chart-labels')
+const statLeft = document.getElementById('stat-left');
+const budgetProgress = document.getElementById('budget-progress');
+const capOver = document.getElementById('cap-over');
+const capOk = document.getElementById('cap-ok');
+
 
 let statusTimer;
 
@@ -23,6 +33,18 @@ export function showStatus(message) {
 export function showEmptyState(message) {
     emptyState.textContent = message;
     emptyState.hidden = message === '';
+}
+
+// fill in the dashboard numbers.
+export function renderStats (count, total, topCategory) {
+    statCount.textContent = count;
+    statTotal.textContent = total.toFixed(2);
+    if (topCategory === '') {
+        statTop.textContent = '-';
+    }
+    else {
+        statTop.textContent = topCategory;
+    }
 }
 
 // Redraw every record as a table row (laptop/tablet) and a card (phone).
@@ -124,10 +146,10 @@ function createEditCard(record) {
     const fields = createEditFields(record);
 
     card.append(
-        fields.description,
+        fields.date,
         fields.amount,
         fields.category,
-        fields.date,
+        fields.description,
         createButton('Save', 'save', record),
         createButton('Cancel', 'cancel', record)
     );
@@ -175,5 +197,68 @@ export function showSortState(key, ascending) {
         } else {
             header.setAttribute('aria-sort', 'descending');
         }
+    }
+}
+
+// One bar per day. The tallest bar is the biggest day; each bar has a text label for screen readers.
+export function renderChart(days) {
+    chart.replaceChildren();
+    chartLabels.replaceChildren();
+
+    let biggest = 0;
+    for (const day of days) {
+        if (day.total > biggest) {
+            biggest = day.total;
+        }
+    }
+
+    for (const day of days) {
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        let height = 0;
+        if (biggest > 0) {
+            height = (day.total / biggest) * 100;
+        }
+        bar.style.height = height + '%';
+        bar.setAttribute('role', 'img');
+        bar.setAttribute('aria-label', day.date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ': ' + day.total.toFixed(2));
+        chart.append(bar);
+
+        const label = document.createElement('span');
+        label.textContent = day.date.toLocaleDateString('en-GB', { weekday: 'short' });
+        chartLabels.append(label);
+    }
+
+}
+
+// only change the text if it's different, so live regions don't repeat themselves on every redraw.
+function setText(element, text) {
+    if (element.textContent !== text) {
+        element.textContent = text;
+    }
+}
+
+//Budget bar. "left" stat and message: polite (status) when under, assertive (alert) when over.
+export function renderBudget(budget, total) {
+    if (budget === 0) {
+        statLeft.textContent = '-';
+        budgetProgress.value = 0;
+        setText(capOk, 'No buget set yet. Add one in Settings')
+        setText(capOver, '')
+        return;    
+    }
+
+    const left = budget - total;
+    budgetProgress.value = (total / budget) * 100;
+
+    if (left >= 0) {
+        statLeft.textContent = left.toFixed(2);
+        setText(capOver, '');
+        setText(capOk, left.toFixed(2) +  ' Left of your ' + budget.toFixed(2) + ' budget.');
+    }
+    else {
+        statLeft.textContent = 'Over ' + (-left).toFixed(2);
+        setText(capOk, '');
+        setText(capOver, 'Over budget by ' + (-left).toFixed(2) + '.');
     }
 }
