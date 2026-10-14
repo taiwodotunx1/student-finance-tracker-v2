@@ -1,4 +1,5 @@
 import { getCategories } from './state.js';
+import { highlight } from './search.js';
 
 // ui.js: draws records, stats and messages on the page.
 
@@ -18,9 +19,16 @@ export function showStatus(message) {
     }, 3000);
 }
 
+// Show "No expenses yet." / "No matches…", or hide the message when '' is given.
+export function showEmptyState(message) {
+    emptyState.textContent = message;
+    emptyState.hidden = message === '';
+}
+
 // Redraw every record as a table row (laptop/tablet) and a card (phone).
 // newId (optional) fades in a newly added record; editingId shows one record as inputs.
-export function renderRecords(records, newId, editingId) {
+// regex (optional) highlights search matches.
+export function renderRecords(records, newId, editingId, regex) {
     tableBody.replaceChildren();
     cardList.replaceChildren();
 
@@ -31,8 +39,8 @@ export function renderRecords(records, newId, editingId) {
             row = createEditRow(record);
             card = createEditCard(record);
         } else {
-            row = createRow(record);
-            card = createCard(record);
+            row = createRow(record, regex);
+            card = createCard(record, regex);
         }
         if (record.id === newId) {
             row.classList.add('row-enter');
@@ -41,22 +49,20 @@ export function renderRecords(records, newId, editingId) {
         tableBody.append(row);
         cardList.append(card);
     }
-    emptyState.hidden = records.length > 0;
 }
 
-function createRow(record) {
+function createRow(record, regex) {
     const row = document.createElement('tr');
     row.dataset.id = record.id;
 
     const actions = document.createElement('td');
     actions.append(createButton('Edit', 'edit', record), createButton('Delete', 'delete', record));
 
-
     row.append(
-        createCell(record.date),
-        createCell(record.description),
-        createCell(record.amount.toFixed(2)),
-        createCell(record.category),
+        createCell(highlight(record.date, regex)),
+        createCell(highlight(record.description, regex)),
+        createCell(highlight(record.amount.toFixed(2), regex)),
+        createCell(highlight(record.category, regex)),
         actions
     );
     return row;
@@ -79,15 +85,15 @@ function createButton(text, action, record) {
     return button;
 }
 
-function createCard(record) {
+function createCard(record, regex) {
     const card = document.createElement('li');
     card.dataset.id = record.id;
 
     const title = document.createElement('h3');
-    title.textContent = record.description;
+    title.append(highlight(record.description, regex));
 
     const details = document.createElement('p');
-    details.textContent = record.amount.toFixed(2) + ' · ' + record.category + ' · ' + record.date;
+    details.append(highlight(record.amount.toFixed(2) + ' · ' + record.category + ' · ' + record.date, regex));
     
     card.append(title, details, createButton('Edit', 'edit', record), createButton('Delete', 'delete', record));
     return card;

@@ -1,6 +1,7 @@
 import { validateDescription, cleanDescription, validateAmount, validateDate, checkDuplicateWord } from './validators.js';
 import { addRecord, getRecords, deleteRecord, updateRecord, sortRecords } from './state.js';
-import { showStatus, renderRecords, showSortState } from './ui.js';
+import { showStatus, renderRecords, showSortState, showEmptyState } from './ui.js';
+import { compileRegex, matchesSearch } from './search.js';
 
 const form = document.getElementById('expense-form');
 const descriptionInput = document.getElementById('description');
@@ -12,6 +13,8 @@ const categorySelect = document.getElementById('category');
 const recordsSection = document.getElementById('records');
 const searchInput = document.getElementById('search');
 const sortSelect = document.getElementById('sort');
+const caseToggle = document.getElementById('case-toggle');
+const matchCount = document.getElementById('match-count');
 
 let editingId = null;
 
@@ -100,14 +103,33 @@ function deleteExpense(id) {
     searchInput.focus();
 }
 
-// Redraw the records in the chosen order, keeping whichever one is being edited open.
+// Sort, search, then draw. Every change to the records list goes through here.
 function refresh(newId) {
     const parts = sortSelect.value.split('-');
     const key = parts[0];
     const ascending = parts[1] === 'asc';
+    let  list = sortRecords(getRecords(), key, ascending);
 
-    renderRecords(sortRecords(getRecords(), key, ascending), newId, editingId);
+    const ignoreCase = caseToggle.getAttribute('aria-pressed') === 'true';
+    const search = compileRegex(searchInput.value, ignoreCase);
+    showError(searchInput, search.error);
+    if (search.regex) {
+        list = list.filter(record => matchesSearch(record, search.regex));
+        matchCount.textContent = 'Matches: ' + list.length;
+    } else {
+        matchCount.textContent = '';
+    }
+
+    renderRecords(list, newId, editingId, search.regex);
     showSortState(key, ascending);
+
+    if (getRecords().length === 0) {
+        showEmptyState('No expenses yet.');
+    } else if (list.length === 0) {
+        showEmptyState('No matches for this pattern.');
+    } else {
+        showEmptyState('');
+    }
 }
 
 // Each record is drawn twice (table row + phone card) and CSS hides one.
@@ -199,6 +221,16 @@ recordsSection.addEventListener('keydown', function (event) {
 });
 
 sortSelect.addEventListener('change', function () {
+    refresh();
+});
+
+searchInput.addEventListener('input', function () {
+    refresh();
+});
+
+caseToggle.addEventListener('click', function () {
+    const pressed = caseToggle.getAttribute('aria-pressed') === 'true';
+    caseToggle.setAttribute('aria-pressed', String(!pressed));
     refresh();
 });
 
