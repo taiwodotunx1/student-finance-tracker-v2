@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validator Tests</title>
+</head>
+<body>
+    <main>
+        <h1>Validator tests</h1>
+        <p id="summary"></p>
+        <ul id="results"></ul>
+    </main>
+
+    <script type="module">
+        import {
+            validateDescription, cleanDescription, validateAmount, validateDate,
+            validateCategory, checkDuplicateWord, validateRate
+        } from '../scripts/validators.js';
+
+        const results = document.getElementById('results');
+        let passed = 0;
+        let failed = 0;
+
+        // Show one test result: PASS if the condition is true, FAIL if not.
+        function check(label, condition) {
+            const item = document.createElement('li');
+            if (condition) {
+                item.textContent = 'PASS: ' + label;
+                passed++;
+            } else {
+                item.textContent = 'FAIL: ' + label;
+                failed++;
+            }
+            results.append(item);
+        }
+
+        // A validator returns '' for good input and a message for bad input.
+        function shouldAccept(validator, inputs) {
+            for (const input of inputs) {
+                check(validator.name + ' accepts ' + JSON.stringify(input), validator(input) === '');
+            }
+        }
+
+        function shouldReject(validator, inputs) {
+            for (const input of inputs) {
+                check(validator.name + ' rejects ' + JSON.stringify(input), validator(input) !== '');
+            }
+        }
+
+        shouldAccept(validateDescription, ['Lunch', 'Bus to campus', 'A']);
+        shouldReject(validateDescription, [' Lunch', 'Lunch ', '']);
+        check('cleanDescription turns double spaces into one', cleanDescription('Bus   to  campus') === 'Bus to campus');
+
+        shouldAccept(validateAmount, ['0', '12', '12.5', '12.50', '99999.99']);
+        shouldReject(validateAmount, ['012', '12.', '12.555', '-5', '.50', 'abc', '']);
+
+        shouldAccept(validateDate, ['2026-10-12', '2024-02-29', '2025-12-31']);
+        shouldReject(validateDate, ['2026-13-01', '2026-1-5', '12/10/2026', '2026-02-31', '2026-02-29', '']);
+
+        shouldAccept(validateCategory, ['Food', 'Eating Out', 'Self-care']);
+        shouldReject(validateCategory, ['Food1', ' Food', 'Food--x', 'Food  Out', '']);
+
+        shouldAccept(checkDuplicateWord, ['Bus to campus', 'the theme park']);
+        shouldReject(checkDuplicateWord, ['lunch lunch at cafe', 'The the bus', 'Coffee coffee refill']);
+
+        shouldAccept(validateRate, ['1', '0.85', '0.00069', '1500.5']);
+        shouldReject(validateRate, ['0', '0.00', '-1', 'abc', '']);
+
+        document.getElementById('summary').textContent = passed + ' passed, ' + failed + ' failed';
+    </script>
+</body>
+</html>
