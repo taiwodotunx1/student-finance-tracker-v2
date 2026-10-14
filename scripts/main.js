@@ -1,6 +1,6 @@
 import { validateDescription, cleanDescription, validateAmount, validateDate, checkDuplicateWord } from './validators.js';
-import { addRecord, getRecords, deleteRecord, updateRecord } from './state.js';
-import { showStatus, renderRecords } from './ui.js';
+import { addRecord, getRecords, deleteRecord, updateRecord, sortRecords } from './state.js';
+import { showStatus, renderRecords, showSortState } from './ui.js';
 
 const form = document.getElementById('expense-form');
 const descriptionInput = document.getElementById('description');
@@ -11,6 +11,7 @@ const descriptionWarning = document.getElementById('description-warning');
 const categorySelect = document.getElementById('category');
 const recordsSection = document.getElementById('records');
 const searchInput = document.getElementById('search');
+const sortSelect = document.getElementById('sort');
 
 let editingId = null;
 
@@ -59,7 +60,6 @@ function clearForm() {
 descriptionInput.addEventListener('input', checkDescription);
 amountInput.addEventListener('input', checkAmount);
 dateInput.addEventListener('change', checkDate);
-
 clearButton.addEventListener('click', clearForm);
 
 form.addEventListener('submit', function (event) {
@@ -100,9 +100,14 @@ function deleteExpense(id) {
     searchInput.focus();
 }
 
-// Redraw the records, keeping whichever one is being edited open.
+// Redraw the records in the chosen order, keeping whichever one is being edited open.
 function refresh(newId) {
-    renderRecords(getRecords(), newId, editingId);
+    const parts = sortSelect.value.split('-');
+    const key = parts[0];
+    const ascending = parts[1] === 'asc';
+
+    renderRecords(sortRecords(getRecords(), key, ascending), newId, editingId);
+    showSortState(key, ascending);
 }
 
 // Each record is drawn twice (table row + phone card) and CSS hides one.
@@ -191,6 +196,10 @@ recordsSection.addEventListener('keydown', function (event) {
     if (event.key === 'Escape' && editingId !== null) {
         cancelEdit();
     }
+});
+
+sortSelect.addEventListener('change', function () {
+    refresh();
 });
 
 // Draw the page once when the app starts.

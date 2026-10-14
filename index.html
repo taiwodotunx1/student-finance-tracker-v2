@@ -72,14 +72,25 @@
                 <p id="search-error" class="error"></p>
             </div>
             <p id="match-count" role="status"></p>
+            <div class="field">
+                <label for="sort">Sort by</label>
+                <select id="sort">
+                    <option value="date-desc">Date (newest first)</option>
+                    <option value="date-asc">Date (oldest first)</option>
+                    <option value="description-asc">Description (A–Z)</option>
+                    <option value="description-desc">Description (Z–A)</option>
+                    <option value="amount-asc">Amount (low to high)</option>
+                    <option value="amount-desc">Amount (high to low)</option>
+                </select>
+            </div>
 
             <table class="records-table">
                 <caption class="sr-only">Your expenses</caption>
                 <thead>
                     <tr>
-                        <th scope="col"><button type="button" data-sort="date">Date</button></th>
-                        <th scope="col"><button type="button" data-sort="description">Description</button></th>
-                        <th scope="col"><button type="button" data-sort="amount">Amount</button></th>
+                        <th scope="col" data-sort="date">Date</th>
+                        <th scope="col" data-sort="description">Description</th>
+                        <th scope="col" data-sort="amount">Amount</th>
                         <th scope="col">Category</th>
                         <th scope="col">Actions</th>
                     </tr>

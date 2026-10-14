@@ -158,3 +158,16 @@ function createCategorySelect(selected) {
     select.value = selected;
     return select;
 }
+
+// Tell screen readers which column the table is sorted by.
+export function showSortState(key, ascending) {
+    for (const header of document.querySelectorAll('th[data-sort]')) {
+        if (header.dataset.sort !== key) {
+            header.removeAttribute('aria-sort');
+        } else if (ascending) {
+            header.setAttribute('aria-sort', 'ascending');
+        } else {
+            header.setAttribute('aria-sort', 'descending');
+        }
+    }
+}

@@ -41,3 +41,17 @@ export function updateRecord(id, fields) {
 export function deleteRecord(id) {
     records = records.filter(r => r.id !== id);
 }
+
+// Return a sorted copy of the list; the original order is left alone.
+export function sortRecords(list, key, ascending) {
+    const sorted = list.slice();
+    if (key === 'amount') {
+        sorted.sort((a, b) => a.amount - b.amount);
+    } else {
+        sorted.sort((a, b) => a[key].localeCompare(b[key]));
+    }
+    if (!ascending) {
+        sorted.reverse();
+    }
+    return sorted;
+}
