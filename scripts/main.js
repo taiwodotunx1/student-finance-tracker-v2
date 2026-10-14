@@ -1,4 +1,6 @@
-import { validateDescription, validateAmount, validateDate, checkDuplicateWord } from "./validators.js";
+import { validateDescription, cleanDescription, validateAmount, validateDate, checkDuplicateWord } from './validators.js';
+import { addRecord, getRecords } from './state.js';
+import { showStatus, renderRecords } from './ui.js';
 
 const form = document.getElementById('expense-form');
 const descriptionInput = document.getElementById('description');
@@ -6,6 +8,7 @@ const amountInput = document.getElementById('amount');
 const dateInput = document.getElementById('date');
 const clearButton = document.getElementById('clear-btn');
 const descriptionWarning = document.getElementById('description-warning');
+const categorySelect = document.getElementById('category');
 
 //  Show a field's error message (or clear it when message is '').
 function showError(input, message) {
@@ -64,11 +67,23 @@ form.addEventListener('submit', function (event) {
 
     if (descriptionOK && amountOK && dateOK) {
 
-        // M4: add the expense to the records here.
+        const newRecord = addRecord({
+            description: cleanDescription(descriptionInput.value),
+            amount: Number(amountInput.value),
+            category: categorySelect.value,
+            date: dateInput.value
+        });
+
+        renderRecords(getRecords(), newRecord.id);
+        showStatus('Expense added.');
 
         clearForm();
+        descriptionInput.focus();
     }
     else {
         form.querySelector('[aria-invalid="true"]').focus();
     }
 });
+
+// Draw the page once when the app starts.
+renderRecords(getRecords());
