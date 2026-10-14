@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Finance Tracker</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <script type="module" src="scripts/main.js"></script>
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to content</a>
+
+    <header class="site-header">
+        <h1>ALU Finance Tracker</h1>
+        <nav aria-label="Primary">
+            <ul>
+                <li><a href="#dashboard">Dashboard</a></li>
+                <li><a href="#records">Records</a></li>
+                <li><a href="#add">Add</a></li>
+                <li><a href="#settings">Settings</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main" tabindex="-1">
+        <section id="dashboard" aria-labelledby="dashboard-title">
+            <h2 id="dashboard-title">Dashboard</h2>
+
+            <ul class="stats">
+                <li class="stat">
+                    <span class="stat-label">Records</span>
+                    <span id="stat-count" class="stat-value">0</span>
+                </li>
+                <li class="stat">
+                    <span class="stat-label">Spent</span>
+                    <span id="stat-total" class="stat-value">0.00</span>
+                </li>
+                <li class="stat">
+                    <span class="stat-label">Top Category</span>
+                    <span id="stat-top" class="stat-value">-</span>
+                </li>
+                <li class="stat">
+                    <span class="stat-label">Left</span>
+                    <span id="stat-left" class="stat-value">-</span>
+                </li>
+            </ul>
+
+            <div class="dash-row">
+                <div class="card">
+                    <h3 id="chart-title">Last 7 days</h3>
+                    <div id="chart" class="chart" role="group" aria-labelledby="chart-title"></div>
+                </div>
+
+                <div class="card">
+                    <h3>Budget cap</h3>
+                    <label for="budget-progress" class="sr-only">Budget used</label>
+                    <progress id="budget-progress" max="100" value="0"></progress>
+                    <p id="cap-ok" role="status"></p>
+                    <p id="cap-over" role="alert"></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="records" aria-labelledby="records-title">
+            <h2 id="records-title">Records</h2>
+
+            <div class="search-bar">
+                <label for="search">Search (supports regex)</label>
+                <input type="text" id="search" autocomplete="off" spellcheck="false" aria-describedby="search-error">
+                <button id="case-toggle" type="button" aria-pressed="false">Aa <span class="sr-only">Ignore case</span></button>
+                <p id="search-error" class="error"></p>
+            </div>
+            <p id="match-count" role="status"></p>
+
+            <table class="records-table">
+                <caption class="sr-only">Your expenses</caption>
+                <thead>
+                    <tr>
+                        <th scope="col"><button type="button" data-sort="date">Date</button></th>
+                        <th scope="col"><button type="button" data-sort="description">Description</button></th>
+                        <th scope="col"><button type="button" data-sort="amount">Amount</button></th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="records-body"></tbody>
+            </table>
+
+            <ul id="record-cards" class="record-cards"></ul>
+            <p id="empty-state">No expenses yet.</p>
+
+        </section>
+
+        <section id="add" aria-labelledby="add-title">
+            <h2 id="add-title">Add expense</h2>
+
+            <form id="expense-form" novalidate>
+                <div class="field">
+                    <label for="description">Description</label>
+                    <input type="text" name="description" id="description" autocomplete="off" aria-describedby="description-error description-warning">
+                    <p id="description-error" class="error"></p>
+                    <p id="description-warning" class="warning"></p>
+                </div>
+
+                <div class="field">
+                    <label for="amount">Amount (RWF)</label>
+                    <input type="text" name="amount" id="amount" inputmode="decimal" autocomplete="off" aria-describedby="amount-error">
+                    <p id="amount-error" class="error"></p>
+                </div>
+
+                <div class="field">
+                    <label for="category">Category</label>
+                    <select name="category" id="category">
+                        <option>Food</option>
+                        <option>Books</option>
+                        <option>Transport</option>
+                        <option>Entertainment</option>
+                        <option>Fees</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" name="date" aria-describedby="date-error">
+                    <p id="date-error" class="error"></p>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit">Save</button>
+                    <button type="button" id="clear-btn">Clear</button>
+                </div>
+            </form>
+        </section>
+
+        <section id="settings" aria-labelledby="settings-title">
+            <h2 id="settings-title">Settings</h2>
+
+            <form id="settings-form" novalidate>
+                <div class="field">
+                    <label for="budget">Budget cap (RWF)</label>
+                    <input type="text" id="budget" inputmode="decimal" autocomplete="off" aria-describedby="budget-error">
+                    <p id="budget-error" class="error"></p>
+                </div>
+
+                <fieldset>
+                    <legend>Currency</legend>
+
+                    <div class="field">
+                        <label for="display-currency">Show amounts in</label>
+                        <select id="display-currency">
+                            <option value="RWF">RWF</option>
+                            <option value="USD">USD</option>
+                            <option value="NGN">NGN</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="rate-usd">1 RWF = ? USD</label>
+                        <input type="text" id="rate-usd" inputmode="decimal" autocomplete="off" aria-describedby="rate-usd-error">
+                        <p id="rate-usd-error" class="error"></p>
+                    </div>
+
+                    <div class="field">
+                        <label for="rate-ngn">1 RWF = ? NGN</label>
+                        <input type="text" id="rate-ngn" inputmode="decimal" autocomplete="off" aria-describedby="rate-ngn-error">
+                        <p id="rate-ngn-error" class="error"></p>
+                    </div>
+                </fieldset>
+
+                <button type="submit">Save settings</button>
+            </form>
+
+            <fieldset>
+                <legend>Categories</legend>
+                <ul id="category-list" class="category-list"></ul>
+                <form id="category-form" novalidate>
+                    <div class="field">
+                        <label for="new-category">New category</label>
+                        <input type="text" id="new-category" autocomplete="off" aria-describedby="new-category-error">
+                        <p id="new-category-error" class="error"></p>
+                    </div>
+                    <button type="submit">Add category</button>
+                </form>
+            </fieldset>
+
+            <fieldset>
+                <legend>Data</legend>
+                <button type="button" id="export-btn">Export JSON</button>
+                <div class="field">
+                    <label for="import-file">Import JSON</label>
+                    <input type="file" id="import-file" accept=".json,application/json">
+                </div>
+            </fieldset>
+        </section>
+
+        <section id="about" aria-labelledby="about-title">
+            <h2 id="about-title">About</h2>
+            <p>ALU Finance Tracker helps students log their spending, search it, and stay within a budget. Your data stays in your own browser.</p>
+
+            <p>Contact: <a href="https://github.com/taiwodotunx1">GitHub</a> .
+            <a href="mailto:a.taiwo@alustudent.com">Email</a>
+            </p>
+        </section>
+        <p id="status" class="status" role="status"></p>
+
+    </main>
+    <footer>
+        <p>
+            <a href="https://github.com/taiwodotunx1">GitHub</a> |
+            <a href="mailto:a.taiwo@alustudent.com">Email</a>
+        </p>
+    </footer>
+    
+</body>
+</html>
