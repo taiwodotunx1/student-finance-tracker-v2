@@ -1,6 +1,11 @@
 // state.js: holds the records. Every change to the data goes through these functions.
 
 let records = [];
+const categories = ['Food', 'Books', 'Transport', 'Entertainment', 'Fees', 'Other'];
+
+export function getCategories() {
+    return categories;
+}
 
 export function getRecords() {
     return records;

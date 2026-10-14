@@ -1,3 +1,5 @@
+import { getCategories } from './state.js';
+
 // ui.js: draws records, stats and messages on the page.
 
 const statusBox = document.getElementById('status');
@@ -17,14 +19,21 @@ export function showStatus(message) {
 }
 
 // Redraw every record as a table row (laptop/tablet) and a card (phone).
-// newId (optional) marks the record that was just added, so it fades in.
-export function renderRecords(records, newId) {
+// newId (optional) fades in a newly added record; editingId shows one record as inputs.
+export function renderRecords(records, newId, editingId) {
     tableBody.replaceChildren();
     cardList.replaceChildren();
 
     for (const record of records) {
-        const row = createRow(record);
-        const card = createCard(record);
+        let row;
+        let card;
+        if (record.id === editingId) {
+            row = createEditRow(record);
+            card = createEditCard(record);
+        } else {
+            row = createRow(record);
+            card = createCard(record);
+        }
         if (record.id === newId) {
             row.classList.add('row-enter');
             card.classList.add('row-enter');
@@ -32,27 +41,42 @@ export function renderRecords(records, newId) {
         tableBody.append(row);
         cardList.append(card);
     }
-
     emptyState.hidden = records.length > 0;
 }
 
 function createRow(record) {
     const row = document.createElement('tr');
     row.dataset.id = record.id;
+
+    const actions = document.createElement('td');
+    actions.append(createButton('Edit', 'edit', record), createButton('Delete', 'delete', record));
+
+
     row.append(
         createCell(record.date),
         createCell(record.description),
         createCell(record.amount.toFixed(2)),
         createCell(record.category),
-        createCell('')
+        actions
     );
     return row;
 }
 
-function createCell(text) {
+function createCell(content) {
     const cell = document.createElement('td');
-    cell.textContent = text;
+    cell.append(content);
     return cell;
+}
+
+// A button for one record, e.g. "Delete". The aria-label adds which record,
+// so screen readers hear "Delete Lunch at cafeteria", not just "Delete".
+function createButton(text, action, record) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = text;
+    button.dataset.action = action;
+    button.setAttribute('aria-label', text + ' ' + record.description);
+    return button;
 }
 
 function createCard(record) {
@@ -65,6 +89,72 @@ function createCard(record) {
     const details = document.createElement('p');
     details.textContent = record.amount.toFixed(2) + ' · ' + record.category + ' · ' + record.date;
     
-    card.append(title, details);
+    card.append(title, details, createButton('Edit', 'edit', record), createButton('Delete', 'delete', record));
     return card;
+}
+
+// The editing version of a row: inputs instead of text, Save/Cancel instead of Edit/Delete.
+function createEditRow(record) {
+    const row = document.createElement('tr');
+    row.dataset.id = record.id;
+    const fields = createEditFields(record);
+
+    const actions = document.createElement('td');
+    actions.append(createButton('Save', 'save', record), createButton('Cancel', 'cancel', record));
+
+    row.append(
+        createCell(fields.date),
+        createCell(fields.description),
+        createCell(fields.amount),
+        createCell(fields.category),
+        actions
+    );
+    return row;
+}
+
+function createEditCard(record) {
+    const card = document.createElement('li');
+    card.dataset.id = record.id;
+    const fields = createEditFields(record);
+
+    card.append(
+        fields.description,
+        fields.amount,
+        fields.category,
+        fields.date,
+        createButton('Save', 'save', record),
+        createButton('Cancel', 'cancel', record)
+    );
+    return card;
+}
+
+function createEditFields(record) {
+    return {
+        date: createInput('date', 'Date', record.date),
+        description: createInput('text', 'Description', record.description),
+        amount: createInput('text', 'Amount', String(record.amount)),
+        category: createCategorySelect(record.category)
+    };
+}
+
+function createInput(type, label, value) {
+    const input = document.createElement('input');
+    input.type = type;
+    input.value = value;
+    input.dataset.field = label.toLowerCase();
+    input.setAttribute('aria-label', label);
+    return input;
+}
+
+function createCategorySelect(selected) {
+    const select = document.createElement('select');
+    select.dataset.field = 'category';
+    select.setAttribute('aria-label', 'category');
+    for (const name of getCategories()) {
+        const option = document.createElement('option');
+        option.textContent = name;
+        select.append(option);
+    }
+    select.value = selected;
+    return select;
 }
