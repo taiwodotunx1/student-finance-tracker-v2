@@ -2,7 +2,7 @@ import { validateDescription, cleanDescription, validateAmount, validateDate, ch
 import { addRecord, getRecords, deleteRecord, updateRecord, sortRecords, getTotal, getTopCategory, getLastSevenDays, getSettings, setBudget, setRecords } from './state.js';
 import { showStatus, renderRecords, showSortState, showEmptyState, renderStats, renderChart, renderBudget } from './ui.js';
 import { compileRegex, matchesSearch } from './search.js';
-import { loadRecords, saveRecords, loadSettings, saveSettings, exportRecords } from './storage.js';
+import { loadRecords, saveRecords, loadSettings, saveSettings, exportRecords, parseImport } from './storage.js';
 
 const form = document.getElementById('expense-form');
 const descriptionInput = document.getElementById('description');
@@ -19,6 +19,7 @@ const matchCount = document.getElementById('match-count');
 const settingsForm = document.getElementById('settings-form');
 const budgetInput = document.getElementById('budget');
 const exportButton = document.getElementById('export-btn');
+const importInput = document.getElementById('import-file');
 
 let editingId = null;
 
@@ -263,9 +264,37 @@ settingsForm.addEventListener ('submit', function (event) {
     showStatus('Settings saved.')
 });
 
+function importText(text) {
+    const result = parseImport(text);
+    if (result.error !== '') {
+        showStatus('Import failed: ' + result.error);
+        return;
+    }
+    if (!confirm('Replace your ' + getRecords().length + ' expenses with the ' + result.records.length + ' in this file?')) {
+        return;
+    }
+    setRecords(result.records);
+    editingId = null;
+    refresh();
+    showStatus('Imported ' + result.records.length + ' expenses.');
+}
+
 exportButton.addEventListener('click', function () {
     exportRecords(getRecords());
     showStatus('Exported ' + getRecords().length + ' expenses.');
+});
+
+importInput.addEventListener('change', function () {
+    const file = importInput.files[0];
+    if (!file) {
+        return;
+    }
+    const reader = new FileReader();
+    reader.addEventListener('load', function () {
+        importText(reader.result);
+        importInput.value = '';
+    });
+    reader.readAsText(file);
 });
 
 // Load saved data, then draw the page.

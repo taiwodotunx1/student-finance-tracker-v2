@@ -1,5 +1,6 @@
-// storage.js: saves and loads data in the browser's localstorage.
+import { isValidRecord } from "./validators.js";
 
+// storage.js: saves and loads data in the browser's localstorage.
 const RECORDS_KEY = 'finance-tracker:records';
 const SETTINGS_KEY = 'finance-tracker:settings';
 
@@ -9,7 +10,7 @@ export function loadRecords() {
     try {
         const data = JSON.parse(localStorage.getItem(RECORDS_KEY));
         if (Array.isArray(data)) {
-            return data;
+            return data.filter(isValidRecord);
         }
     }
     catch {
@@ -62,4 +63,32 @@ export function exportRecords(records) {
     link.click();
 
     URL.revokeObjectURL(url);
+}
+
+// Check a whole imported file before using any of it. Returns { records, error }.
+export function parseImport(text) {
+    let data;
+    try {
+        data = JSON.parse(text);
+    } catch {
+        return { records: null, error: 'This file is not valid JSON.' };
+    }
+
+    if (!Array.isArray(data)) {
+        return { records: null, error: 'The file must contain a list of expenses.' };
+    }
+
+    const ids = [];
+    for (let i = 0; i < data.length; i++) {
+        const record = data[i];
+        if (!isValidRecord(record)) {
+            return { records: null, error: 'Expense ' + (i + 1) + ' has a missing or invalid field.' };
+        }
+        if (ids.includes(record.id)) {
+            return { records: null, error: 'Expense ' + (i + 1) + ' has the same id as an earlier one.' };
+        }
+        ids.push(record.id);
+    }
+
+    return { records: data, error: '' };
 }

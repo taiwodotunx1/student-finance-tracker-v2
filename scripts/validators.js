@@ -83,3 +83,16 @@ export function validateRate(text) {
     }
     return '';
 }
+
+// True if a record (from a file or saved data) has every field in the right format.
+export function isValidRecord(record) {
+    return record !== null
+        && typeof record === 'object'
+        && typeof record.id === 'string' && record.id !== ''
+        && typeof record.description === 'string' && validateDescription(record.description) === ''
+        && typeof record.amount === 'number' && validateAmount(String(record.amount)) === ''
+        && typeof record.category === 'string' && validateCategory(record.category) === ''
+        && typeof record.date === 'string' && validateDate(record.date) === ''
+        && typeof record.createdAt === 'string'
+        && typeof record.updatedAt === 'string';
+}
