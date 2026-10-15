@@ -1,13 +1,25 @@
 // state.js: holds the records. Every change to the data goes through these functions.
 
 let records = [];
-const settings = { budget: 0};
+const settings = {
+    budget: 0,
+    currency: 'RWF',
+    rates: { USD: 0.00069, NGN: 1.07 }
+};
 export function getSettings() {
     return settings;
 }
 
 export function setBudget(amount) {
     settings.budget = amount;
+}
+
+export function setCurrency(code) {
+    settings.currency = code;
+}
+
+export function setRate(code, rate) {
+    settings.rates[code] = rate;
 }
 
 export function getRecords() {
@@ -113,4 +125,14 @@ function toDateText(date) {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return year + '-' + month + '-' + day;
+}
+
+
+// An amount (stored in RWF) as text in the chosen currency, e.g. "2500.00 RWF" or "1.73 USD".
+export function formatMoney(amount) {
+    let value = amount;
+    if (settings.currency !== 'RWF') {
+        value = amount * settings.rates[settings.currency];
+    }
+    return value.toFixed(2) + ' ' + settings.currency;
 }

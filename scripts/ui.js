@@ -1,3 +1,4 @@
+import { formatMoney } from './state.js';
 import { highlight } from './search.js';
 
 // ui.js: draws records, stats and messages on the page.
@@ -36,7 +37,7 @@ export function showEmptyState(message) {
 // fill in the dashboard numbers.
 export function renderStats(count, total, topCategory) {
     statCount.textContent = count;
-    statTotal.textContent = total.toFixed(2);
+    statTotal.textContent = formatMoney(total);
     if (topCategory === '') {
         statTop.textContent = '-';
     }
@@ -81,7 +82,7 @@ function createRow(record, regex) {
     row.append(
         createCell(highlight(record.date, regex)),
         createCell(highlight(record.description, regex)),
-        createCell(highlight(record.amount.toFixed(2), regex)),
+        createCell(highlight(formatMoney(record.amount), regex)),
         createCell(highlight(record.category, regex)),
         actions
     );
@@ -113,7 +114,7 @@ function createCard(record, regex) {
     title.append(highlight(record.description, regex));
 
     const details = document.createElement('p');
-    details.append(highlight(record.amount.toFixed(2) + ' · ' + record.category + ' · ' + record.date, regex));
+    details.append(highlight(formatMoney(record.amount) + ' · ' + record.category + ' · ' + record.date, regex));
     
     card.append(title, details, createButton('Edit', 'edit', record), createButton('Delete', 'delete', record));
     return card;
@@ -206,7 +207,7 @@ export function renderChart(days) {
         }
         bar.style.height = height + '%';
         bar.setAttribute('role', 'img');
-        bar.setAttribute('aria-label', day.date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ': ' + day.total.toFixed(2));
+        bar.setAttribute('aria-label', day.date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ': ' + formatMoney(day.total));
         chart.append(bar);
 
         const label = document.createElement('span');
@@ -237,13 +238,13 @@ export function renderBudget(budget, total) {
     budgetProgress.value = (total / budget) * 100;
 
     if (left >= 0) {
-        statLeft.textContent = left.toFixed(2);
+        statLeft.textContent = formatMoney(left);
         setText(capOver, '');
-        setText(capOk, left.toFixed(2) +  ' Left of your ' + budget.toFixed(2) + ' budget.');
+        setText(capOk, formatMoney(left) + ' left of your ' + formatMoney(budget) + ' budget.');
     }
     else {
-        statLeft.textContent = 'Over ' + (-left).toFixed(2);
+        statLeft.textContent = 'Over ' + formatMoney(-left);
         setText(capOk, '');
-        setText(capOver, 'Over budget by ' + (-left).toFixed(2) + '.');
+        setText(capOver, 'Over budget by ' + formatMoney(-left) + '.');
     }
 }

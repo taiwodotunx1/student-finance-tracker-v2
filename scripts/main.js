@@ -1,5 +1,5 @@
-import { validateDescription, cleanDescription, cleanCategory, validateAmount, validateDate, validateCategory, checkDuplicateWord } from './validators.js';
-import { addRecord, getRecords, deleteRecord, updateRecord, sortRecords, getTotal, getTopCategory, getLastSevenDays, getSettings, setBudget, setRecords } from './state.js';
+import { validateDescription, cleanDescription, cleanCategory, validateAmount, validateDate, validateCategory, checkDuplicateWord, validateRate } from './validators.js';
+import { addRecord, getRecords, deleteRecord, updateRecord, sortRecords, getTotal, getTopCategory, getLastSevenDays, getSettings, setBudget, setRecords, setCurrency, setRate } from './state.js';
 import { showStatus, renderRecords, showSortState, showEmptyState, renderStats, renderChart, renderBudget } from './ui.js';
 import { compileRegex, matchesSearch } from './search.js';
 import { loadRecords, saveRecords, loadSettings, saveSettings, exportRecords, parseImport } from './storage.js';
@@ -20,6 +20,9 @@ const settingsForm = document.getElementById('settings-form');
 const budgetInput = document.getElementById('budget');
 const exportButton = document.getElementById('export-btn');
 const importInput = document.getElementById('import-file');
+const currencySelect = document.getElementById('display-currency');
+const rateUsdInput = document.getElementById('rate-usd');
+const rateNgnInput = document.getElementById('rate-ngn');
 
 let editingId = null;
 
@@ -50,9 +53,19 @@ function checkAmount() {
     return message === '';
 }
 
+// An empty budget box means "no budget", so it's allowed.
 function checkBudget() {
-    const message = validateAmount(budgetInput.value);
+    let message = '';
+    if (budgetInput.value !== '') {
+        message = validateAmount(budgetInput.value);
+    }
     showError(budgetInput, message);
+    return message === '';
+}
+
+function checkRate(input) {
+    const message = validateRate(input.value);
+    showError(input, message);
     return message === '';
 }
 
@@ -262,14 +275,31 @@ caseToggle.addEventListener('click', function () {
 });
 
 budgetInput.addEventListener('input', checkBudget);
+rateUsdInput.addEventListener('input', function () {
+    checkRate(rateUsdInput);
+});
+
+rateNgnInput.addEventListener('input', function () {
+    checkRate(rateNgnInput);
+});
+
+currencySelect.addEventListener('change', function () {
+    setCurrency(currencySelect.value);
+    refresh();
+});
 
 settingsForm.addEventListener('submit', function (event) {
     event.preventDefault();
-    if (!checkBudget()) {
-        budgetInput.focus();
+    const budgetOK = checkBudget();
+    const usdOK = checkRate(rateUsdInput);
+    const ngnOK = checkRate(rateNgnInput);
+    if (!budgetOK || !usdOK || !ngnOK) {
+        settingsForm.querySelector('[aria-invalid="true"]').focus();
         return;
     }
     setBudget(Number(budgetInput.value));
+    setRate('USD', Number(rateUsdInput.value));
+    setRate('NGN', Number(rateNgnInput.value));
     refresh();
     showStatus('Settings saved.');
 });
@@ -311,11 +341,27 @@ importInput.addEventListener('change', function () {
 setRecords(loadRecords());
 
 const savedSettings = loadSettings();
-if (savedSettings !== null && typeof savedSettings.budget === 'number' && savedSettings.budget >= 0) {
-    setBudget(savedSettings.budget);
+if (savedSettings !== null) {
+    if (typeof savedSettings.budget === 'number' && savedSettings.budget >= 0) {
+        setBudget(savedSettings.budget);
+    }
+    if (savedSettings.currency === 'RWF' || savedSettings.currency === 'USD' || savedSettings.currency === 'NGN') {
+        setCurrency(savedSettings.currency);
+    }
+    if (savedSettings.rates && typeof savedSettings.rates.USD === 'number' && savedSettings.rates.USD > 0) {
+        setRate('USD', savedSettings.rates.USD);
+    }
+    if (savedSettings.rates && typeof savedSettings.rates.NGN === 'number' && savedSettings.rates.NGN > 0) {
+        setRate('NGN', savedSettings.rates.NGN);
+    }
 }
+
+// Fill the Settings form with the current settings.
 if (getSettings().budget > 0) {
     budgetInput.value = getSettings().budget;
 }
+currencySelect.value = getSettings().currency;
+rateUsdInput.value = getSettings().rates.USD;
+rateNgnInput.value = getSettings().rates.NGN;
 
 refresh();

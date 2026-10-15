@@ -1,6 +1,7 @@
+import { formatMoney } from './state.js';
 // search.js: turns the user's search text into a regex, filters records, and highlights matches safely.
-
 // Build a regex from what the user typed. A broken pattern like "[" returns an error instead of crashing.
+
 export function compileRegex(text, ignoreCase) {
     if (text === '') {
         return { regex: null, error: '' };
@@ -20,7 +21,7 @@ export function compileRegex(text, ignoreCase) {
 export function matchesSearch(record, regex) {
     return regex.test(record.description)
         || regex.test(record.category)
-        || regex.test(record.amount.toFixed(2))
+        || regex.test(formatMoney(record.amount))
         || regex.test(record.date);
 }
 
