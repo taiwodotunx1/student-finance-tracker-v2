@@ -49,3 +49,17 @@ export function saveSettings(settings) {
         // Storage full or blocked; Keep working without saving.
     }
 }
+
+// Download the records as a .json file.
+export function exportRecords(records) {
+    const text = JSON.stringify(records, null, 2);
+    const file = new Blob([text], { type: 'application/json' });
+    const url = URL.createObjectURL(file);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'finance-records.json';
+    link.click();
+
+    URL.revokeObjectURL(url);
+}

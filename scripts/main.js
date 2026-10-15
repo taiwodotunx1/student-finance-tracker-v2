@@ -2,7 +2,7 @@ import { validateDescription, cleanDescription, validateAmount, validateDate, ch
 import { addRecord, getRecords, deleteRecord, updateRecord, sortRecords, getTotal, getTopCategory, getLastSevenDays, getSettings, setBudget, setRecords } from './state.js';
 import { showStatus, renderRecords, showSortState, showEmptyState, renderStats, renderChart, renderBudget } from './ui.js';
 import { compileRegex, matchesSearch } from './search.js';
-import { loadRecords, saveRecords, loadSettings, saveSettings } from './storage.js';
+import { loadRecords, saveRecords, loadSettings, saveSettings, exportRecords } from './storage.js';
 
 const form = document.getElementById('expense-form');
 const descriptionInput = document.getElementById('description');
@@ -18,6 +18,7 @@ const caseToggle = document.getElementById('case-toggle');
 const matchCount = document.getElementById('match-count');
 const settingsForm = document.getElementById('settings-form');
 const budgetInput = document.getElementById('budget');
+const exportButton = document.getElementById('export-btn');
 
 let editingId = null;
 
@@ -260,6 +261,11 @@ settingsForm.addEventListener ('submit', function (event) {
     setBudget(Number(budgetInput.value));
     refresh();
     showStatus('Settings saved.')
+});
+
+exportButton.addEventListener('click', function () {
+    exportRecords(getRecords());
+    showStatus('Exported ' + getRecords().length + ' expenses.');
 });
 
 // Load saved data, then draw the page.
