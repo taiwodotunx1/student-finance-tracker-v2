@@ -115,7 +115,6 @@ function createCard(record, regex) {
 
     const details = document.createElement('p');
     details.append(highlight(formatMoney(record.amount) + ' · ' + record.category + ' · ' + record.date, regex));
-    
     card.append(title, details, createButton('Edit', 'edit', record), createButton('Delete', 'delete', record));
     return card;
 }
@@ -231,7 +230,7 @@ export function renderBudget(budget, total) {
         budgetProgress.value = 0;
         setText(capOk, 'No budget set yet. Add one in Settings');
         setText(capOver, '');
-        return;    
+        return;
     }
 
     const left = budget - total;

@@ -127,7 +127,6 @@ function toDateText(date) {
     return year + '-' + month + '-' + day;
 }
 
-
 // An amount (stored in RWF) as text in the chosen currency, e.g. "2500.00 RWF" or "1.73 USD".
 export function formatMoney(amount) {
     let value = amount;

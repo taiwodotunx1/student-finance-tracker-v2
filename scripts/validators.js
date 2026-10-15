@@ -1,3 +1,4 @@
+// validators.js: one function per regex rule. Each returns an error message, or '' if the value is fine.
 const descriptionPattern = /^\S(?:.*\S)?$/;
 const amountPattern = /^(0|[1-9]\d*)(\.\d{1,2})?$/;
 const datePattern = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;

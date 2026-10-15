@@ -1,3 +1,4 @@
+// main.js: starts the app and connects every event to state, storage and ui.
 import { validateDescription, cleanDescription, cleanCategory, validateAmount, validateDate, validateCategory, checkDuplicateWord, validateRate } from './validators.js';
 import { addRecord, getRecords, deleteRecord, updateRecord, sortRecords, getTotal, getTopCategory, getLastSevenDays, getSettings, setBudget, setRecords, setCurrency, setRate } from './state.js';
 import { showStatus, renderRecords, showSortState, showEmptyState, renderStats, renderChart, renderBudget } from './ui.js';

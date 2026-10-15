@@ -1,6 +1,6 @@
 import { isValidRecord, cleanCategory } from "./validators.js";
 
-// storage.js: saves and loads data in the browser's localstorage.
+// storage.js: saves and loads data in the browser's localStorage.
 const RECORDS_KEY = 'finance-tracker:records';
 const SETTINGS_KEY = 'finance-tracker:settings';
 
@@ -13,7 +13,7 @@ export function loadRecords() {
         }
     }
     catch {
-        // Broken data: fail through and start empty instead of crashing.
+        // Broken data: fall through and start empty instead of crashing.
     }
     return [];
 }
@@ -27,7 +27,7 @@ export function saveRecords(records) {
     }
 }
 
-// Sved settings object, or null if there are none or they're broken
+// Saved settings object, or null if there are none or they're broken
 export function loadSettings() {
     try {
         const data = JSON.parse(localStorage.getItem(SETTINGS_KEY));
@@ -36,7 +36,7 @@ export function loadSettings() {
         }
     }
     catch {
-        // Broken data use the deafault settings.
+        // Broken data: use the deafault settings.
     }
     return null;
 }

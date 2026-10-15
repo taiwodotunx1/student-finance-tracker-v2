@@ -193,7 +193,7 @@ footer a {
     gap: var(--space-2);
 }
 
-.chart-labels span{
+.chart-labels span {
     flex: 1;
     font-size: 0.75rem;
     text-align: center;
@@ -371,7 +371,7 @@ th, td {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .row-enter{
+    .row-enter {
         animation: none;
     }
     button {
