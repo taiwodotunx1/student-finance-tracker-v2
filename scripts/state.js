@@ -19,6 +19,10 @@ export function getRecords() {
     return records;
 }
 
+export function setRecords(list) {
+    records = list;
+}
+
 export function addRecord(fields) {
     const now = new Date().toISOString();
     const record = {

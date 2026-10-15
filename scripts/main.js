@@ -1,7 +1,8 @@
 import { validateDescription, cleanDescription, validateAmount, validateDate, checkDuplicateWord } from './validators.js';
-import { addRecord, getRecords, deleteRecord, updateRecord, sortRecords, getTotal, getTopCategory, getLastSevenDays, getSettings, setBudget } from './state.js';
+import { addRecord, getRecords, deleteRecord, updateRecord, sortRecords, getTotal, getTopCategory, getLastSevenDays, getSettings, setBudget, setRecords } from './state.js';
 import { showStatus, renderRecords, showSortState, showEmptyState, renderStats, renderChart, renderBudget } from './ui.js';
 import { compileRegex, matchesSearch } from './search.js';
+import { loadRecords, saveRecords, loadSettings, saveSettings } from './storage.js';
 
 const form = document.getElementById('expense-form');
 const descriptionInput = document.getElementById('description');
@@ -111,8 +112,10 @@ function deleteExpense(id) {
     searchInput.focus();
 }
 
-// Sort, search, then draw. Every change to the records list goes through here.
+// Sort, search, then draw. Every change goes through here.
 function refresh(newId) {
+    saveRecords(getRecords());
+    saveSettings(getSettings());
     const parts = sortSelect.value.split('-');
     const key = parts[0];
     const ascending = parts[1] === 'asc';
@@ -259,5 +262,15 @@ settingsForm.addEventListener ('submit', function (event) {
     showStatus('Settings saved.')
 });
 
-// Draw the page once when the app starts.
+// Load saved data, then draw the page.
+setRecords(loadRecords());
+
+const savedSettings = loadSettings();
+if (savedSettings !== null && typeof savedSettings.budget === 'number' && savedSettings.budget >= 0) {
+    setBudget(savedSettings.budget);
+}
+if (getSettings().budget > 0) {
+    budgetInput.value = getSettings().budget;
+}
+
 refresh();

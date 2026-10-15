@@ -243,7 +243,7 @@ export function renderBudget(budget, total) {
     if (budget === 0) {
         statLeft.textContent = '-';
         budgetProgress.value = 0;
-        setText(capOk, 'No buget set yet. Add one in Settings')
+        setText(capOk, 'No budget set yet. Add one in Settings')
         setText(capOver, '')
         return;    
     }
