@@ -319,6 +319,10 @@ th, td {
     text-align: left;
 }
 
+.records-table button + button {
+    margin-left: var(--space-2);
+}
+
 .record-cards {
     display: flex;
     flex-direction: column;
