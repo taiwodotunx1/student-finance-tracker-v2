@@ -1,7 +1,6 @@
 // state.js: holds the records. Every change to the data goes through these functions.
 
 let records = [];
-const categories = ['Food', 'Books', 'Transport', 'Entertainment', 'Fees', 'Other'];
 const settings = { budget: 0};
 export function getSettings() {
     return settings;
@@ -9,10 +8,6 @@ export function getSettings() {
 
 export function setBudget(amount) {
     settings.budget = amount;
-}
-
-export function getCategories() {
-    return categories;
 }
 
 export function getRecords() {
@@ -59,8 +54,10 @@ export function sortRecords(list, key, ascending) {
     const sorted = list.slice();
     if (key === 'amount') {
         sorted.sort((a, b) => a.amount - b.amount);
+    } else if (key === 'description') {
+        sorted.sort((a, b) => a.description.localeCompare(b.description));
     } else {
-        sorted.sort((a, b) => a[key].localeCompare(b[key]));
+        sorted.sort((a, b) => a.date.localeCompare(b.date));
     }
     if (!ascending) {
         sorted.reverse();
@@ -77,22 +74,15 @@ export function getTotal(list) {
     return total;
 }
 
-// The category with the most money spent ('' if there are no records).
+// The category with the most money spent ('' if nothing has been spent).
 export function getTopCategory(list) {
-    const totals = {};
-    for (const record of list) {
-        if (totals[record.category] === undefined) {
-            totals[record.category] = 0;
-        }
-        totals[record.category] += record.amount;
-    }
-
     let topCategory = '';
-    let topAmount = -1;
-    for (const category in totals) {
-        if (totals[category] > topAmount) {
-            topCategory = category;
-            topAmount = totals[category];
+    let topAmount = 0;
+    for (const record of list) {
+        const amount = getTotal(list.filter(r => r.category === record.category));
+        if (amount > topAmount) {
+            topCategory = record.category;
+            topAmount = amount;
         }
     }
     return topCategory;

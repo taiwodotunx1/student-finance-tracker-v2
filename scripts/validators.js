@@ -19,6 +19,11 @@ export function cleanDescription(text) {
     return text.replace(/\s{2,}/g, ' ');
 }
 
+// "food", "FOOD" and "Food" all become "Food", so they count as one category.
+export function cleanCategory(text) {
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
+
 export function validateAmount(text) {
     if (text === '') {
         return 'Amount is required.';

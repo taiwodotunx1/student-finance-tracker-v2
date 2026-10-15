@@ -15,7 +15,7 @@
     <script type="module">
         import {
             validateDescription, cleanDescription, validateAmount, validateDate,
-            validateCategory, checkDuplicateWord, validateRate
+            validateCategory, checkDuplicateWord, validateRate, cleanCategory
         } from '../scripts/validators.js';
 
         const results = document.getElementById('results');
@@ -60,6 +60,7 @@
 
         shouldAccept(validateCategory, ['Food', 'Eating Out', 'Self-care']);
         shouldReject(validateCategory, ['Food1', ' Food', 'Food--x', 'Food  Out', '']);
+        check('cleanCategory turns "fOOD" into "Food"', cleanCategory('fOOD') === 'Food');
 
         shouldAccept(checkDuplicateWord, ['Bus to campus', 'the theme park']);
         shouldReject(checkDuplicateWord, ['lunch lunch at cafe', 'The the bus', 'Coffee coffee refill']);

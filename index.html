@@ -123,14 +123,16 @@
 
                 <div class="field">
                     <label for="category">Category</label>
-                    <select name="category" id="category">
-                        <option>Food</option>
-                        <option>Books</option>
-                        <option>Transport</option>
-                        <option>Entertainment</option>
-                        <option>Fees</option>
-                        <option>Other</option>
-                    </select>
+                    <input type="text" name="category" id="category" list="category-options" autocomplete="off" aria-describedby="category-error">
+                    <datalist id="category-options">
+                        <option value="Food"></option>
+                        <option value="Books"></option>
+                        <option value="Transport"></option>
+                        <option value="Entertainment"></option>
+                        <option value="Fees"></option>
+                        <option value="Other"></option>
+                    </datalist>
+                    <p id="category-error" class="error"></p>
                 </div>
 
                 <div class="field">
@@ -183,19 +185,6 @@
 
                 <button type="submit">Save settings</button>
             </form>
-
-            <fieldset>
-                <legend>Categories</legend>
-                <ul id="category-list" class="category-list"></ul>
-                <form id="category-form" novalidate>
-                    <div class="field">
-                        <label for="new-category">New category</label>
-                        <input type="text" id="new-category" autocomplete="off" aria-describedby="new-category-error">
-                        <p id="new-category-error" class="error"></p>
-                    </div>
-                    <button type="submit">Add category</button>
-                </form>
-            </fieldset>
 
             <fieldset>
                 <legend>Data</legend>

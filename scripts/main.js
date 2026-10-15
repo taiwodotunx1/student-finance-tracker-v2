@@ -1,4 +1,4 @@
-import { validateDescription, cleanDescription, validateAmount, validateDate, checkDuplicateWord } from './validators.js';
+import { validateDescription, cleanDescription, cleanCategory, validateAmount, validateDate, validateCategory, checkDuplicateWord } from './validators.js';
 import { addRecord, getRecords, deleteRecord, updateRecord, sortRecords, getTotal, getTopCategory, getLastSevenDays, getSettings, setBudget, setRecords } from './state.js';
 import { showStatus, renderRecords, showSortState, showEmptyState, renderStats, renderChart, renderBudget } from './ui.js';
 import { compileRegex, matchesSearch } from './search.js';
@@ -10,7 +10,7 @@ const amountInput = document.getElementById('amount');
 const dateInput = document.getElementById('date');
 const clearButton = document.getElementById('clear-btn');
 const descriptionWarning = document.getElementById('description-warning');
-const categorySelect = document.getElementById('category');
+const categoryInput = document.getElementById('category');
 const recordsSection = document.getElementById('records');
 const searchInput = document.getElementById('search');
 const sortSelect = document.getElementById('sort');
@@ -62,18 +62,26 @@ function checkDate() {
     return message === '';
 }
 
+function checkCategory() {
+    const message = validateCategory(categoryInput.value);
+    showError(categoryInput, message);
+    return message === '';
+}
+
 function clearForm() {
     form.reset();
     showError(descriptionInput, '');
     showError(amountInput, '');
+    showError(categoryInput, '');
     showError(dateInput, '');
-    descriptionWarning.textContent = ''
+    descriptionWarning.textContent = '';
 }
 
 // Check each field while the user types.
 descriptionInput.addEventListener('input', checkDescription);
 amountInput.addEventListener('input', checkAmount);
 dateInput.addEventListener('change', checkDate);
+categoryInput.addEventListener('input', checkCategory);
 clearButton.addEventListener('click', clearForm);
 
 form.addEventListener('submit', function (event) {
@@ -82,13 +90,14 @@ form.addEventListener('submit', function (event) {
     const descriptionOK = checkDescription();
     const amountOK = checkAmount();
     const dateOK = checkDate();
+    const categoryOK = checkCategory();
 
-    if (descriptionOK && amountOK && dateOK) {
+    if (descriptionOK && amountOK && categoryOK && dateOK) {
 
         const newRecord = addRecord({
             description: cleanDescription(descriptionInput.value),
             amount: Number(amountInput.value),
-            category: categorySelect.value,
+            category: cleanCategory(categoryInput.value),
             date: dateInput.value
         });
 
@@ -114,14 +123,14 @@ function deleteExpense(id) {
     searchInput.focus();
 }
 
-// Sort, search, then draw. Every change goes through here.
+// Save, sort, search, then draw. Every change goes through here.
 function refresh(newId) {
     saveRecords(getRecords());
     saveSettings(getSettings());
     const parts = sortSelect.value.split('-');
     const key = parts[0];
     const ascending = parts[1] === 'asc';
-    let  list = sortRecords(getRecords(), key, ascending);
+    let list = sortRecords(getRecords(), key, ascending);
 
     const ignoreCase = caseToggle.getAttribute('aria-pressed') === 'true';
     const search = compileRegex(searchInput.value, ignoreCase);
@@ -191,9 +200,10 @@ function saveEdit(id, button) {
     const descriptionError = checkEditField(description, validateDescription);
     const amountError = checkEditField(amount, validateAmount);
     const dateError = checkEditField(date, validateDate);
+    const categoryError = checkEditField(category, validateCategory);
 
-    if (descriptionError !== '' || amountError !== '' || dateError !== '') {
-        showStatus((descriptionError + ' ' + amountError + ' ' + dateError).trim());
+    if (descriptionError !== '' || amountError !== '' || categoryError !== '' || dateError !== '') {
+        showStatus((descriptionError + ' ' + amountError + ' ' + categoryError + ' ' + dateError).trim());
         container.querySelector('[aria-invalid="true"]').focus();
         return;
     }
@@ -201,7 +211,7 @@ function saveEdit(id, button) {
     updateRecord(id, {
         description: cleanDescription(description.value),
         amount: Number(amount.value),
-        category: category.value,
+        category: cleanCategory(category.value),
         date: date.value
     });
     editingId = null;
@@ -253,7 +263,7 @@ caseToggle.addEventListener('click', function () {
 
 budgetInput.addEventListener('input', checkBudget);
 
-settingsForm.addEventListener ('submit', function (event) {
+settingsForm.addEventListener('submit', function (event) {
     event.preventDefault();
     if (!checkBudget()) {
         budgetInput.focus();
@@ -261,7 +271,7 @@ settingsForm.addEventListener ('submit', function (event) {
     }
     setBudget(Number(budgetInput.value));
     refresh();
-    showStatus('Settings saved.')
+    showStatus('Settings saved.');
 });
 
 function importText(text) {

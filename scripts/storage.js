@@ -1,11 +1,10 @@
-import { isValidRecord } from "./validators.js";
+import { isValidRecord, cleanCategory } from "./validators.js";
 
 // storage.js: saves and loads data in the browser's localstorage.
 const RECORDS_KEY = 'finance-tracker:records';
 const SETTINGS_KEY = 'finance-tracker:settings';
 
 //saved records, or [] if there are none or the saved data is broken.
-
 export function loadRecords() {
     try {
         const data = JSON.parse(localStorage.getItem(RECORDS_KEY));
@@ -87,6 +86,7 @@ export function parseImport(text) {
         if (ids.includes(record.id)) {
             return { records: null, error: 'Expense ' + (i + 1) + ' has the same id as an earlier one.' };
         }
+        record.category = cleanCategory(record.category);
         ids.push(record.id);
     }
 

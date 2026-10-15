@@ -1,4 +1,3 @@
-import { getCategories } from './state.js';
 import { highlight } from './search.js';
 
 // ui.js: draws records, stats and messages on the page.
@@ -10,13 +9,12 @@ const emptyState = document.getElementById('empty-state');
 const statCount = document.getElementById('stat-count');
 const statTotal = document.getElementById('stat-total');
 const statTop = document.getElementById('stat-top');
-const chart = document.getElementById('chart')
-const chartLabels = document.getElementById('chart-labels')
+const chart = document.getElementById('chart');
+const chartLabels = document.getElementById('chart-labels');
 const statLeft = document.getElementById('stat-left');
 const budgetProgress = document.getElementById('budget-progress');
 const capOver = document.getElementById('cap-over');
 const capOk = document.getElementById('cap-ok');
-
 
 let statusTimer;
 
@@ -36,7 +34,7 @@ export function showEmptyState(message) {
 }
 
 // fill in the dashboard numbers.
-export function renderStats (count, total, topCategory) {
+export function renderStats(count, total, topCategory) {
     statCount.textContent = count;
     statTotal.textContent = total.toFixed(2);
     if (topCategory === '') {
@@ -147,9 +145,9 @@ function createEditCard(record) {
 
     card.append(
         fields.date,
+        fields.description,
         fields.amount,
         fields.category,
-        fields.description,
         createButton('Save', 'save', record),
         createButton('Cancel', 'cancel', record)
     );
@@ -161,7 +159,7 @@ function createEditFields(record) {
         date: createInput('date', 'Date', record.date),
         description: createInput('text', 'Description', record.description),
         amount: createInput('text', 'Amount', String(record.amount)),
-        category: createCategorySelect(record.category)
+        category: createInput('text', 'Category', record.category)
     };
 }
 
@@ -172,19 +170,6 @@ function createInput(type, label, value) {
     input.dataset.field = label.toLowerCase();
     input.setAttribute('aria-label', label);
     return input;
-}
-
-function createCategorySelect(selected) {
-    const select = document.createElement('select');
-    select.dataset.field = 'category';
-    select.setAttribute('aria-label', 'category');
-    for (const name of getCategories()) {
-        const option = document.createElement('option');
-        option.textContent = name;
-        select.append(option);
-    }
-    select.value = selected;
-    return select;
 }
 
 // Tell screen readers which column the table is sorted by.
@@ -243,8 +228,8 @@ export function renderBudget(budget, total) {
     if (budget === 0) {
         statLeft.textContent = '-';
         budgetProgress.value = 0;
-        setText(capOk, 'No budget set yet. Add one in Settings')
-        setText(capOver, '')
+        setText(capOk, 'No budget set yet. Add one in Settings');
+        setText(capOver, '');
         return;    
     }
 

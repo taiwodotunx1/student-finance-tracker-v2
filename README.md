@@ -54,4 +54,5 @@ Each expense is saved like this:
 - Exchange rates come with sensible defaults, and users can edit them in Settings (no live API).
 - The user sets their own budget cap in Settings; the app compares it with total spending.
 - Records are edited inline, inside their own row.
-- Categories start as Food, Books, Transport, Entertainment, Fees, Other, and can be edited in Settings.
+- Categories are typed freely (letters, spaces and hyphens). The six defaults are suggested as you type
+- Categories are stored as "Food" style, so food = FOOD = Food.
