@@ -4,7 +4,7 @@
 
 **Live site:** https://taiwodotunx1.github.io/student-finance-tracker-v2/
 
-**Demo video:** (link added in Step 32)
+**Demo video:** https://youtu.be/kPt9o2nXwTI?si=eFygj-RXsMnrVpx1
 
 ## Features
 
